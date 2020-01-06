@@ -3,66 +3,95 @@ import ReactDOM from 'react-dom'
 import { DIRECTIONS } from './utils'
 
 class SwipeCards extends Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = {
-      index: 0,
+      like: false,
+      dislike: false,
+      nolike: false,
+      nolike2: false,
       alertLeft: false,
       alertRight: false,
       alertTop: false,
       alertBottom: false,
+      index: 0,
       containerSize: { x: 0, y: 0 }
     }
     this.removeCard = this.removeCard.bind(this)
-    this.setSize = this.setSize.bind(this)
   }
-  removeCard (side, cardId) {
+  removeCard() {
     const { children, onEnd } = this.props
-    setTimeout(() => this.setState({ [`alert${side}`]: false }), 300)
-    
-    if (children.length === (this.state.index + 1) && onEnd) onEnd()
 
+    if (children.length === (this.state.index + 1) && onEnd) onEnd()
+    
+    setTimeout(() => this.setState({ [`alert${side}`]: false }), 300)
+
+    this.setState({
+      like: false,
+      dislike: false,
+      nolike: false,
+      nolike2: false,
+    })
     this.setState({
       index: this.state.index + 1,
       [`alert${side}`]: true
     })
   }
-  
-  componentDidMount () {
-    this.setSize()
-    window.addEventListener('resize', this.setSize)
-  }
-   componentWillUnmount () {
-    window.removeEventListener('resize', this.setSize)
-  }
 
-  setSize () {
-    const container = ReactDOM.findDOMNode(this)
-    const containerSize = {
-      x: container.offsetWidth,
-      y: container.offsetHeight
+  like() {
+    if (!this.state.like && !this.state.dislike && !this.state.nolike && !this.state.nolike2) {
+      this.setState({
+        like: true
+      });
     }
-    this.setState({ containerSize })
   }
 
-  render () {
-    const { index, containerSize } = this.state
-    const { children, className, onSwipeTop, onSwipeBottom } = this.props
-    if (!containerSize.x || !containerSize.y) return  <div className={className} />
+  dislike() {
+    if (!this.state.like && !this.state.dislike && !this.state.nolike && !this.state.nolike2) {
+      this.setState({
+        dislike: true
+      });
+    }
+  }
+  
+  nolike() {
+    if (!this.state.like && !this.state.dislike && !this.state.nolike && !this.state.nolike2) {
+      this.setState({
+        nolike: true
+      });
+    }
+  }
+  
+  nolike2() {
+    if (!this.state.like && !this.state.dislike && !this.state.nolike && !this.state.nolike2) {
+      this.setState({
+        nolike2: true
+      });
+    }
+  }  
+
+  render() {
+    const { like, dislike, index, nolike, nolike2 } = this.state
+    const { children, className, likeOverlay, dislikeOverlay, nolikeOverlay, nolike2Overlay } = this.props
 
     const _cards = children.reduce((memo, c, i) => {
       if (index > i) return memo
       const props = {
         key: i,
-        containerSize,
         index: children.length - index,
-        ...DIRECTIONS.reduce((m, d) => 
-          ({ ...m, [`onOutScreen${d}`]: () => this.removeCard(d) }), {}),
-        active: index === i
+        ...DIRECTIONS.reduce((m, d) =>
+          ({ ...m, [`onOutScreen${d}`]: () => this.removeCard() }), {}),
+        active: index === i,
+        like,
+        dislike,
+        likeOverlay,
+        dislikeOverlay,
+        nolikeOverlay.
+        nolike2Overlay
       }
-      return [ cloneElement(c, props), ...memo ]
+      return [cloneElement(c, props), ...memo]
     }, [])
-    
+
     return (
       <div className={className}>
         {DIRECTIONS.map(d => 
